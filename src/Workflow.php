@@ -9,6 +9,7 @@ use Laravel\Nova\ResourceTool;
 class Workflow extends ResourceTool
 {
     private $hide = false;
+    public $name = 'Workflow';
 
     /**
      * Workflow constructor.
@@ -24,7 +25,16 @@ class Workflow extends ResourceTool
             $workflow = $workflow->merge(['property_path' => $workflow['column']]);
 
             /** @var \Illuminate\Database\Eloquent\Model $model */
-            $model = app($workflow['model'])->findOrFail(array_last(request()->segments()));
+            $model = app($workflow['model'])->findOrFail(last(request()->segments()));
+            $allowedTransitions = array_filter($workflow->get('transitions'), function ($transition) {
+                if (!isset($transition['permission'])) {
+                    return true;
+                }
+
+                return request()->user()->hasPermissionTo($transition['permission']);
+            });
+
+            $workflow->put('transitions', $allowedTransitions);
 
             $stateMachine = new \SM\StateMachine\StateMachine($model, $workflow->toArray());
 
@@ -33,9 +43,9 @@ class Workflow extends ResourceTool
             $this->fetch_reasons($workflow, $array);
 
             $this->withMeta([
-                'workflow'     => $workflow_name,
+                'workflow' => $workflow_name,
                 'transactions' => $this->get_transitions($array),
-                'styles'       => $this->get_styles($workflow),
+                'styles' => $this->get_styles($workflow),
             ]);
 
 
@@ -48,9 +58,9 @@ class Workflow extends ResourceTool
      *
      * @return string
      */
-    public function name()
+    public function name(): string
     {
-        return 'Workflow';
+        return $this->name;
     }
 
     /**
@@ -58,7 +68,7 @@ class Workflow extends ResourceTool
      *
      * @return string
      */
-    public function component()
+    public function component(): string
     {
         return 'workflow';
     }
@@ -68,11 +78,11 @@ class Workflow extends ResourceTool
      *
      * @return array
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return array_merge([
-            'component'   => 'panel',
-            'name'        => $this->name,
+            'component' => 'panel',
+            'name' => $this->name,
             'showToolbar' => $this->showToolbar,
         ], $this->element->meta());
     }
@@ -83,8 +93,8 @@ class Workflow extends ResourceTool
      */
     protected function fetchReasons($workflow, array $array)
     {
-        collect($workflow['transitions'])->filter(function ($trans, $trans_label) use ($array) {
-            return in_array($trans_label, $array) && array_key_exists('with_reasons', $trans);
+        collect($workflow['transitions'])->filter(static function ($trans, $trans_label) use ($array) {
+            return in_array($trans_label, $array, true) && array_key_exists('with_reasons', $trans);
         })->each(function ($trans, $trans_label) {
             if (!is_array($trans['with_reasons'])) {
                 return $this->setReasons([

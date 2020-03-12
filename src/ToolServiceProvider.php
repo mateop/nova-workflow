@@ -20,9 +20,9 @@ class ToolServiceProvider extends ServiceProvider
             $this->routes();
         });
 
-        Nova::serving(function (ServingNova $event) {
-            Nova::script('workflow', __DIR__.'/../dist/js/tool.js');
-            Nova::style('workflow', __DIR__.'/../dist/css/tool.css');
+        Nova::serving(static function (ServingNova $event) {
+            Nova::script('workflow', __DIR__ . '/../dist/js/tool.js');
+            Nova::style('workflow', __DIR__ . '/../dist/css/tool.css');
         });
 
 
