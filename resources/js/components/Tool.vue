@@ -91,13 +91,7 @@
 
         self.$toasted.show('Resource successfully changed to ' + transaction, {type: 'success'});
 
-        self.$router.push({
-          name: 'index',
-          params: {
-            resourceName: self.resourceName,
-            resourceId: self.resourceId,
-          },
-        })
+        self.$router.go();
       },
 
       reject: function () {

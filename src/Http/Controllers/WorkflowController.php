@@ -42,6 +42,7 @@ class WorkflowController
                 if ($event) {
                     event(new $event($model));
                 }
+                //TODO: set redirect
             });
         } catch (\Exception $exception) {
             return response()->json($exception->getMessage(), 400);
