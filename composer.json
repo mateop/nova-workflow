@@ -9,7 +9,7 @@
     "require": {
         "php": ">=7.1.0",
         "winzou/state-machine": "^0.3.3",
-        "laravel/nova": "^2.0"
+        "laravel/nova": "^3.0"
     },
     "autoload": {
         "psr-4": {
